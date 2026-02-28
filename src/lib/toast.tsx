@@ -42,12 +42,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <button
               key={t.id}
               onClick={() => dismiss(t.id)}
-              className={`rounded-sm border-l-3 px-4 py-3 text-sm shadow-lg transition-all animate-in slide-in-from-right bg-parchment text-left ${
+              className={`rounded-sm border-l-3 px-4 py-3 text-sm shadow-lg transition-all animate-in slide-in-from-right bg-background text-left ${
                 t.variant === "success"
-                  ? "border-l-sage text-sage-hover"
+                  ? "border-l-success text-success"
                   : t.variant === "error"
-                  ? "border-l-red-500 text-red-600"
-                  : "border-l-dusty-blue text-dusty-blue"
+                  ? "border-l-error text-error"
+                  : "border-l-primary text-primary"
               }`}
             >
               {t.message}

@@ -22,17 +22,6 @@
   --color-success: #5B8C5A;
   --color-warning: #D4A843;
 
-  /* --- Legacy Aliases (map old names → new values) --- */
-  --color-parchment: #FBF9F5;
-  --color-parchment-dark: #F0ECE5;
-  --color-warm-gray: #DDD7CD;
-  --color-dusty-blue: #B8915A;
-  --color-dusty-blue-light: #C9A76C;
-  --color-dusty-blue-hover: #A37D4A;
-  --color-sage: #C4868E;
-  --color-sage-hover: #AD7079;
-  --color-text-dark: #2C2724;
-
   /* --- Typography --- */
   --font-heading: 'DM Serif Display', Georgia, serif;
   --font-body: 'DM Sans', system-ui, sans-serif;

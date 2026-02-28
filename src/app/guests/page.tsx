@@ -6,6 +6,14 @@ import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/useRequireAuth";
 import { useToast } from "@/lib/toast";
 import type { Guest, InviteStatus, RsvpStatus } from "@/lib/types";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/Card";
+import { Label } from "@/components/Label";
+import { Input, Textarea, Select } from "@/components/Input";
+import { Button } from "@/components/Button";
+import { Modal } from "@/components/Modal";
+import { Spinner } from "@/components/Spinner";
+import { EmptyState } from "@/components/EmptyState";
 
 const INVITE_LABELS: Record<InviteStatus, string> = {
   not_sent: "Not Sent",
@@ -13,9 +21,9 @@ const INVITE_LABELS: Record<InviteStatus, string> = {
   delivered: "Delivered",
 };
 const INVITE_COLORS: Record<InviteStatus, string> = {
-  not_sent: "bg-warm-gray/60 text-text-muted",
-  sent: "bg-dusty-blue/15 text-dusty-blue",
-  delivered: "bg-sage/15 text-sage-hover",
+  not_sent: "bg-border/60 text-text-muted",
+  sent: "bg-primary/15 text-primary",
+  delivered: "bg-success/15 text-success",
 };
 const RSVP_LABELS: Record<RsvpStatus, string> = {
   no_response: "No Response",
@@ -23,9 +31,9 @@ const RSVP_LABELS: Record<RsvpStatus, string> = {
   declined: "Declined",
 };
 const RSVP_COLORS: Record<RsvpStatus, string> = {
-  no_response: "bg-warm-gray/60 text-text-muted",
-  attending: "bg-sage/15 text-sage-hover",
-  declined: "bg-red-100 text-red-600",
+  no_response: "bg-border/60 text-text-muted",
+  attending: "bg-success/15 text-success",
+  declined: "bg-error/10 text-error",
 };
 
 type FilterTab = "all" | "not_sent" | "sent" | "delivered" | "attending" | "declined" | "no_response";
@@ -60,13 +68,14 @@ export default function GuestsPage() {
   const [importResult, setImportResult] = useState("");
 
   const fetchGuests = useCallback(async (weddingId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("guests")
       .select("*")
       .eq("wedding_id", weddingId)
       .order("name", { ascending: true });
+    if (error) { toast("Failed to load guests: " + error.message, "error"); return; }
     if (data) setGuests(data);
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     if (!ready || !wedding) return;
@@ -222,8 +231,8 @@ export default function GuestsPage() {
     }
     if (rows.length === 0) { setImportResult("No valid rows found."); setImporting(false); return; }
     const { error } = await supabase.from("guests").insert(rows);
-    if (error) { setImportResult("Import failed: " + error.message); }
-    else { setImportResult(`Imported ${rows.length} guest${rows.length > 1 ? "s" : ""}!`); await fetchGuests(wedding.id); }
+    if (error) { toast("Import failed: " + error.message, "error"); setImportResult("Import failed: " + error.message); }
+    else { setImportResult(`Imported ${rows.length} guest${rows.length > 1 ? "s" : ""}!`); toast(`Imported ${rows.length} guest${rows.length > 1 ? "s" : ""}!`, "success"); await fetchGuests(wedding.id); }
     setImporting(false);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -279,128 +288,115 @@ export default function GuestsPage() {
   // Loading
   // ==========================================
   if (!ready || loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-3 border-warm-gray border-t-dusty-blue" />
-          <p className="italic text-text-muted">Loading guest list...</p>
-        </div>
-      </div>
-    );
+    return <Spinner fullPage label="Loading guest list..." />;
   }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-stretch px-4 py-8">
-      {/* Header */}
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-normal uppercase tracking-[4px] text-text-dark">
-          Address Book
-        </h1>
-        <p className="mt-1 text-base italic text-text-muted tracking-wider">
-          {guests.length} guest{guests.length !== 1 ? "s" : ""}
-        </p>
-      </div>
+      <PageHeader
+        title="Address Book"
+        subtitle={`${guests.length} guest${guests.length !== 1 ? "s" : ""}`}
+      />
 
       {/* RSVP Stats */}
       {guests.length > 0 && (
         <div className="mb-5 grid grid-cols-3 gap-3 sm:grid-cols-6">
           <StatBox label="Total" value={stats.total} onClick={() => setFilterTab("all")} active={filterTab === "all"} />
           <StatBox label="Inv. Not Sent" value={stats.invNotSent} onClick={() => setFilterTab("not_sent")} active={filterTab === "not_sent"} color="text-text-muted" />
-          <StatBox label="Inv. Sent" value={stats.invSent} onClick={() => setFilterTab("sent")} active={filterTab === "sent"} color="text-dusty-blue" />
-          <StatBox label="Attending" value={stats.rsvpAttending} onClick={() => setFilterTab("attending")} active={filterTab === "attending"} color="text-sage-hover" />
-          <StatBox label="Declined" value={stats.rsvpDeclined} onClick={() => setFilterTab("declined")} active={filterTab === "declined"} color="text-red-500" />
+          <StatBox label="Inv. Sent" value={stats.invSent} onClick={() => setFilterTab("sent")} active={filterTab === "sent"} color="text-primary" />
+          <StatBox label="Attending" value={stats.rsvpAttending} onClick={() => setFilterTab("attending")} active={filterTab === "attending"} color="text-success" />
+          <StatBox label="Declined" value={stats.rsvpDeclined} onClick={() => setFilterTab("declined")} active={filterTab === "declined"} color="text-error" />
           <StatBox label="No RSVP" value={stats.rsvpNoResponse} onClick={() => setFilterTab("no_response")} active={filterTab === "no_response"} color="text-text-muted" />
         </div>
       )}
 
       {/* Toolbar */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-        <input
-          type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+        <Input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="Search guests..."
-          className="flex-1 rounded-sm border border-warm-gray bg-parchment px-4 py-2.5 text-base focus:border-dusty-blue-light focus:outline-none"
+          className="flex-1"
         />
-        <button onClick={openAdd}
-          className="rounded-sm bg-dusty-blue px-5 py-2.5 text-sm uppercase tracking-[2px] text-parchment hover:bg-dusty-blue-hover hover:-translate-y-px hover:shadow-lg whitespace-nowrap transition-all">
+        <Button onClick={openAdd} className="whitespace-nowrap">
           + Add Guest
-        </button>
+        </Button>
       </div>
 
       {/* CSV Import */}
-      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center rounded-sm border border-warm-gray/60 bg-parchment/50 p-4">
+      <Card variant="panel" className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center">
         <p className="flex-1 text-sm text-text-muted">
           <strong>Import from CSV</strong> — Name (required), Address, Email, Phone, Group
         </p>
-        <label className="cursor-pointer rounded-sm border border-sage bg-transparent px-4 py-2 text-xs uppercase tracking-[1.5px] text-sage-hover hover:bg-sage hover:text-parchment text-center whitespace-nowrap transition-all">
+        <label className="cursor-pointer rounded-md border border-secondary/40 bg-transparent px-4 py-2 text-xs font-medium uppercase tracking-[1.5px] text-secondary-hover hover:bg-secondary hover:text-background text-center whitespace-nowrap transition-all">
           {importing ? "Importing..." : "Choose File"}
           <input ref={fileRef} type="file" accept=".csv" onChange={handleCSV} disabled={importing} className="hidden" />
         </label>
-      </div>
+      </Card>
       {importResult && (
-        <p className={`-mt-4 mb-4 text-sm text-center ${importResult.includes("mport") && !importResult.includes("fail") ? "text-sage" : "text-red-600"}`}>
+        <p className={`-mt-4 mb-4 text-sm text-center ${importResult.includes("mport") && !importResult.includes("fail") ? "text-success" : "text-error"}`}>
           {importResult}
         </p>
       )}
 
       {/* Export & Print */}
       {guests.length > 0 && (
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center rounded-sm border border-warm-gray/60 bg-parchment/50 p-4">
+        <Card variant="panel" className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <p className="flex-1 text-sm text-text-muted">
             <strong>Export & Print</strong>
           </p>
           <div className="flex flex-wrap gap-2">
-            <button onClick={exportAddressCSV}
-              className="rounded-sm border border-dusty-blue-light bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-dusty-blue hover:bg-dusty-blue hover:text-parchment transition-all">
+            <Button variant="outline" size="sm" onClick={exportAddressCSV}>
               Address Labels CSV
-            </button>
-            <button onClick={exportFullCSV}
-              className="rounded-sm border border-dusty-blue-light bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-dusty-blue hover:bg-dusty-blue hover:text-parchment transition-all">
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportFullCSV}>
               Full Guest List CSV
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Print Service Links */}
       {guests.length > 0 && (
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center rounded-sm border border-warm-gray/60 bg-parchment/50 p-4">
+        <Card variant="panel" className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <p className="flex-1 text-sm text-text-muted">
             <strong>Print Labels</strong> — Export CSV above, then upload to:
           </p>
           <div className="flex flex-wrap gap-2">
             <a href="https://www.canva.com/labels/templates/" target="_blank" rel="noopener noreferrer"
-              className="rounded-sm border border-sage bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-sage-hover hover:bg-sage hover:text-parchment transition-all text-center">
+              className="rounded-md border border-secondary/40 bg-transparent px-3 py-1.5 text-xs font-medium uppercase tracking-[1.5px] text-secondary-hover hover:bg-secondary hover:text-background transition-all text-center">
               Canva
             </a>
             <a href="https://www.shutterfly.com/cards-stationery/address-labels/" target="_blank" rel="noopener noreferrer"
-              className="rounded-sm border border-sage bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-sage-hover hover:bg-sage hover:text-parchment transition-all text-center">
+              className="rounded-md border border-secondary/40 bg-transparent px-3 py-1.5 text-xs font-medium uppercase tracking-[1.5px] text-secondary-hover hover:bg-secondary hover:text-background transition-all text-center">
               Shutterfly
             </a>
             <a href="https://www.walmart.com/cp/custom-cards-invitations/1702640" target="_blank" rel="noopener noreferrer"
-              className="rounded-sm border border-sage bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-sage-hover hover:bg-sage hover:text-parchment transition-all text-center">
+              className="rounded-md border border-secondary/40 bg-transparent px-3 py-1.5 text-xs font-medium uppercase tracking-[1.5px] text-secondary-hover hover:bg-secondary hover:text-background transition-all text-center">
               Walmart Photo
             </a>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Guest List */}
       {filtered.length === 0 ? (
-        <p className="py-12 text-center italic text-text-muted">
-          {guests.length === 0 ? "No guests yet. Add guests manually or import a CSV!" : "No matches found."}
-        </p>
+        <EmptyState
+          message={guests.length === 0 ? "No guests yet. Add guests manually or import a CSV!" : "No matches found."}
+        />
       ) : (
         <div className="flex flex-col gap-2">
           {filtered.map((g) => (
             <div key={g.id}
-              className="flex flex-col gap-2 rounded-sm border border-dusty-blue/12 border-l-3 border-l-dusty-blue-light bg-parchment p-4 transition-all hover:shadow-sm"
+              className="flex flex-col gap-2 rounded-md border border-border/60 border-l-3 border-l-primary/40 bg-background p-4 transition-all hover:shadow-soft"
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-lg font-semibold text-text-dark">{g.name}</span>
+                    <span className="text-lg font-semibold text-text">{g.name}</span>
                     {g.group_label && (
-                      <span className="rounded-full bg-dusty-blue/10 px-2 py-0.5 text-xs uppercase tracking-wider text-dusty-blue">
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs uppercase tracking-wider text-primary">
                         {g.group_label}
                       </span>
                     )}
@@ -416,7 +412,6 @@ export default function GuestsPage() {
                 </div>
 
                 <div className="flex flex-shrink-0 items-center gap-2">
-                  {/* Invite status toggle */}
                   <button
                     onClick={() => cycleInvite(g)}
                     className={`rounded-full px-2.5 py-1 text-xs uppercase tracking-wider transition-all hover:opacity-80 ${INVITE_COLORS[g.invite_status]}`}
@@ -424,7 +419,6 @@ export default function GuestsPage() {
                   >
                     {INVITE_LABELS[g.invite_status]}
                   </button>
-                  {/* RSVP status toggle */}
                   <button
                     onClick={() => cycleRsvp(g)}
                     className={`rounded-full px-2.5 py-1 text-xs uppercase tracking-wider transition-all hover:opacity-80 ${RSVP_COLORS[g.rsvp_status]}`}
@@ -432,14 +426,12 @@ export default function GuestsPage() {
                   >
                     {RSVP_LABELS[g.rsvp_status]}
                   </button>
-                  <button onClick={() => openEdit(g)}
-                    className="flex h-8 w-8 items-center justify-center rounded-sm border border-transparent text-text-muted hover:border-warm-gray hover:bg-parchment-dark transition-all" title="Edit">
+                  <Button variant="icon" onClick={() => openEdit(g)} title="Edit">
                     &#9998;
-                  </button>
-                  <button onClick={() => deleteGuest(g.id, g.name)}
-                    className="flex h-8 w-8 items-center justify-center rounded-sm border border-transparent text-text-muted hover:border-red-200 hover:text-red-600 transition-all" title="Delete">
+                  </Button>
+                  <Button variant="danger" onClick={() => deleteGuest(g.id, g.name)} title="Delete">
                     &times;
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -452,13 +444,13 @@ export default function GuestsPage() {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           {[...new Set(guests.map((g) => g.group_label).filter(Boolean))].sort().map((g) => (
             <button key={g} onClick={() => setSearch(g)}
-              className="rounded-full bg-dusty-blue/10 px-3 py-1 text-xs uppercase tracking-wider text-dusty-blue hover:bg-dusty-blue/20 transition-colors">
+              className="rounded-full bg-primary/10 px-3 py-1 text-xs uppercase tracking-wider text-primary hover:bg-primary/20 transition-colors">
               {g} ({guests.filter((guest) => guest.group_label === g).length})
             </button>
           ))}
           {(search || filterTab !== "all") && (
             <button onClick={() => { setSearch(""); setFilterTab("all"); }}
-              className="rounded-full bg-warm-gray/50 px-3 py-1 text-xs uppercase tracking-wider text-text-muted hover:bg-warm-gray transition-colors">
+              className="rounded-full bg-border/50 px-3 py-1 text-xs uppercase tracking-wider text-text-muted hover:bg-border transition-colors">
               Clear filters
             </button>
           )}
@@ -466,112 +458,96 @@ export default function GuestsPage() {
       )}
 
       {/* =================== MODAL =================== */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-text-dark/50 p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}>
-          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-sm border border-dusty-blue/15 bg-gradient-to-br from-parchment to-parchment-dark p-8 shadow-lg">
-            <h2 className="mb-5 text-center text-xl font-normal tracking-wider uppercase text-text-dark">
-              {editingId ? "Edit Guest" : "Add Guest"}
-            </h2>
-            <div className="flex flex-col gap-3">
-              <div>
-                <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">Name *</label>
-                <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)}
-                  className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-4 py-3 text-base text-text-dark focus:border-dusty-blue focus:outline-none"
-                  placeholder="e.g. Aunt Margaret" autoFocus />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">Address</label>
-                <textarea value={formAddress} onChange={(e) => setFormAddress(e.target.value)} rows={2}
-                  className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-4 py-3 text-base text-text-dark focus:border-dusty-blue focus:outline-none resize-y"
-                  placeholder={"123 Main St\nSpringfield, IL 62704"} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">Email</label>
-                  <input type="email" value={formEmail} onChange={(e) => setFormEmail(e.target.value)}
-                    className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-4 py-2.5 text-sm text-text-dark focus:border-dusty-blue focus:outline-none" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">Phone</label>
-                  <input type="tel" value={formPhone} onChange={(e) => setFormPhone(e.target.value)}
-                    className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-4 py-2.5 text-sm text-text-dark focus:border-dusty-blue focus:outline-none" />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">Group / Side</label>
-                <input type="text" value={formGroup} onChange={(e) => setFormGroup(e.target.value)}
-                  className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-4 py-2.5 text-sm text-text-dark focus:border-dusty-blue focus:outline-none"
-                  placeholder="e.g. Bride's Family" />
-              </div>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editingId ? "Edit Guest" : "Add Guest"}
+        maxHeight
+      >
+        <div className="flex flex-col gap-3">
+          <div>
+            <Label required>Name</Label>
+            <Input type="text" value={formName} onChange={(e) => setFormName(e.target.value)}
+              placeholder="e.g. Aunt Margaret" autoFocus />
+          </div>
+          <div>
+            <Label>Address</Label>
+            <Textarea value={formAddress} onChange={(e) => setFormAddress(e.target.value)} rows={2}
+              placeholder={"123 Main St\nSpringfield, IL 62704"} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Email</Label>
+              <Input type="email" value={formEmail} onChange={(e) => setFormEmail(e.target.value)} className="py-2.5 text-sm" />
+            </div>
+            <div>
+              <Label>Phone</Label>
+              <Input type="tel" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} className="py-2.5 text-sm" />
+            </div>
+          </div>
+          <div>
+            <Label>Group / Side</Label>
+            <Input type="text" value={formGroup} onChange={(e) => setFormGroup(e.target.value)}
+              placeholder="e.g. Bride's Family" className="py-2.5 text-sm" />
+          </div>
 
-              {/* Invite & RSVP */}
-              <div className="mt-2 border-t border-warm-gray pt-3">
-                <p className="mb-2 text-xs uppercase tracking-[1.5px] text-text-muted font-semibold">Invite & RSVP</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">Invite Status</label>
-                    <select value={formInvite} onChange={(e) => setFormInvite(e.target.value as InviteStatus)}
-                      className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-3 py-2.5 text-sm text-text-dark focus:border-dusty-blue focus:outline-none">
-                      <option value="not_sent">Not Sent</option>
-                      <option value="sent">Sent</option>
-                      <option value="delivered">Delivered</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">RSVP</label>
-                    <select value={formRsvp} onChange={(e) => setFormRsvp(e.target.value as RsvpStatus)}
-                      className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-3 py-2.5 text-sm text-text-dark focus:border-dusty-blue focus:outline-none">
-                      <option value="no_response">No Response</option>
-                      <option value="attending">Attending</option>
-                      <option value="declined">Declined</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* +1, Meal, Dietary */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">+1 Name</label>
-                  <input type="text" value={formPlusOne} onChange={(e) => setFormPlusOne(e.target.value)}
-                    className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-3 py-2.5 text-sm text-text-dark focus:border-dusty-blue focus:outline-none" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">Meal Choice</label>
-                  <input type="text" value={formMeal} onChange={(e) => setFormMeal(e.target.value)}
-                    className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-3 py-2.5 text-sm text-text-dark focus:border-dusty-blue focus:outline-none"
-                    placeholder="e.g. Chicken, Vegetarian" />
-                </div>
+          {/* Invite & RSVP */}
+          <div className="mt-2 border-t border-border pt-3">
+            <p className="mb-2 text-xs uppercase tracking-[1.5px] text-text-muted font-semibold">Invite & RSVP</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Invite Status</Label>
+                <Select value={formInvite} onChange={(e) => setFormInvite(e.target.value as InviteStatus)} className="px-3 py-2.5 text-sm">
+                  <option value="not_sent">Not Sent</option>
+                  <option value="sent">Sent</option>
+                  <option value="delivered">Delivered</option>
+                </Select>
               </div>
               <div>
-                <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">Dietary Notes</label>
-                <input type="text" value={formDietary} onChange={(e) => setFormDietary(e.target.value)}
-                  className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-3 py-2.5 text-sm text-text-dark focus:border-dusty-blue focus:outline-none"
-                  placeholder="e.g. Gluten-free, Nut allergy" />
-              </div>
-
-              <div className="mt-3 flex justify-center gap-3">
-                <button onClick={saveGuest} disabled={saving}
-                  className="rounded-sm bg-dusty-blue px-6 py-2.5 text-sm uppercase tracking-[2px] text-parchment hover:bg-dusty-blue-hover disabled:opacity-60 disabled:cursor-not-allowed transition-all">
-                  {saving ? "Saving..." : "Save"}
-                </button>
-                <button onClick={() => setModalOpen(false)}
-                  className="rounded-sm border-2 border-sage bg-transparent px-6 py-2.5 text-sm uppercase tracking-[2px] text-sage-hover hover:bg-sage hover:text-parchment transition-all">
-                  Cancel
-                </button>
+                <Label>RSVP</Label>
+                <Select value={formRsvp} onChange={(e) => setFormRsvp(e.target.value as RsvpStatus)} className="px-3 py-2.5 text-sm">
+                  <option value="no_response">No Response</option>
+                  <option value="attending">Attending</option>
+                  <option value="declined">Declined</option>
+                </Select>
               </div>
             </div>
           </div>
+
+          {/* +1, Meal, Dietary */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>+1 Name</Label>
+              <Input type="text" value={formPlusOne} onChange={(e) => setFormPlusOne(e.target.value)} className="px-3 py-2.5 text-sm" />
+            </div>
+            <div>
+              <Label>Meal Choice</Label>
+              <Input type="text" value={formMeal} onChange={(e) => setFormMeal(e.target.value)}
+                placeholder="e.g. Chicken, Vegetarian" className="px-3 py-2.5 text-sm" />
+            </div>
+          </div>
+          <div>
+            <Label>Dietary Notes</Label>
+            <Input type="text" value={formDietary} onChange={(e) => setFormDietary(e.target.value)}
+              placeholder="e.g. Gluten-free, Nut allergy" className="px-3 py-2.5 text-sm" />
+          </div>
+
+          <div className="mt-3 flex justify-center gap-3">
+            <Button onClick={saveGuest} disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </Button>
+            <Button variant="ghost" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+          </div>
         </div>
-      )}
+      </Modal>
 
       {/* Footer */}
       <div className="mt-8 flex justify-center gap-6">
-        <button onClick={() => router.push("/dashboard")}
-          className="text-sm text-text-muted hover:text-dusty-blue transition-colors">
+        <Button variant="link" onClick={() => router.push("/dashboard")}>
           &larr; Back to Tracker
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -586,11 +562,11 @@ function StatBox({ label, value, onClick, active, color }: {
   return (
     <button
       onClick={onClick}
-      className={`rounded-sm border p-2.5 text-center transition-all ${
-        active ? "border-dusty-blue bg-dusty-blue/8 shadow-sm" : "border-warm-gray/60 bg-parchment/50 hover:border-dusty-blue-light"
+      className={`rounded-md border p-2.5 text-center transition-all ${
+        active ? "border-primary bg-primary/8 shadow-soft" : "border-border/60 bg-surface/50 hover:border-primary/40"
       }`}
     >
-      <span className={`block text-xl font-semibold leading-none mb-0.5 ${color || "text-dusty-blue"}`}>{value}</span>
+      <span className={`block text-xl font-semibold leading-none mb-0.5 ${color || "text-primary"}`}>{value}</span>
       <span className="block text-[0.6rem] uppercase tracking-wider text-text-muted leading-tight">{label}</span>
     </button>
   );

@@ -53,20 +53,22 @@ export default function DashboardPage() {
   // Data loading
   // ==========================================
   const fetchGifts = useCallback(async (weddingId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("gifts")
       .select("*")
       .eq("wedding_id", weddingId)
       .order("created_at", { ascending: false });
+    if (error) { toast("Failed to load gifts: " + error.message, "error"); return; }
     if (data) setGifts(data);
-  }, []);
+  }, [toast]);
 
   const fetchGuests = useCallback(async (weddingId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("guests")
       .select("*")
       .eq("wedding_id", weddingId)
       .order("name", { ascending: true });
+    if (error) return;
     if (data) setGuestList(data);
   }, []);
 
@@ -281,15 +283,19 @@ export default function DashboardPage() {
 
   async function copyLetter() {
     if (!letterText) return;
-    await navigator.clipboard.writeText(letterText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(letterText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast("Couldn't copy — try selecting the text manually.", "error");
+    }
   }
 
   function printLetter() {
     if (!letterText) return;
     const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
+    if (!printWindow) { toast("Pop-up blocked — please allow pop-ups for this site.", "error"); return; }
     printWindow.document.write(`<!DOCTYPE html>
 <html><head><title>Thank You Letter</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap" rel="stylesheet">
