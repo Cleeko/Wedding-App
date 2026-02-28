@@ -1,8 +1,8 @@
 import { cn } from "@/lib/cn";
 
 const variants = {
-  form: "rounded-lg border border-border bg-surface p-8 shadow-card",
-  row: "rounded-md border border-border/60 bg-background p-4 transition-all hover:shadow-soft",
+  form: "rounded-lg border border-border bg-surface p-8 shadow-soft",
+  row: "rounded-md border border-border/60 bg-background p-4 transition-all hover:bg-surface/50",
   panel: "rounded-md border border-border/40 bg-surface/50 p-4",
 } as const;
 

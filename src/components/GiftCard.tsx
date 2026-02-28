@@ -26,16 +26,14 @@ export function GiftCard({
   const slideClass = sliding
     ? slideDir === "right"
       ? "translate-x-full opacity-0"
-      : "-translate-x-full opacity-0 bg-error/5 border-l-error/40"
+      : "-translate-x-full opacity-0 bg-error/5"
     : "";
 
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:items-center justify-between rounded-md border bg-background p-4 transition-all duration-400",
-        gift.thank_you_sent
-          ? "border-secondary/20 border-l-3 border-l-secondary bg-gradient-to-r from-secondary/5 to-background"
-          : "border-border/60 border-l-3 border-l-primary/40",
+        "flex flex-col gap-3 sm:flex-row sm:items-center justify-between border-b border-border/40 bg-background px-4 py-3.5 transition-all duration-400 hover:bg-surface/50",
+        gift.thank_you_sent && "bg-secondary/3",
         slideClass,
       )}
     >

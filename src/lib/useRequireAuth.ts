@@ -10,7 +10,7 @@ export function useRequireAuth() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { router.push("/"); return; }
+    if (!user) { router.push("/login"); return; }
     if (!wedding) { router.push("/setup"); return; }
   }, [user, wedding, loading, router]);
 

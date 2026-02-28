@@ -329,7 +329,7 @@ export default function GuestsPage() {
         <p className="flex-1 text-sm text-text-muted">
           <strong>Import from CSV</strong> — Name (required), Address, Email, Phone, Group
         </p>
-        <label className="cursor-pointer rounded-md border border-secondary/40 bg-transparent px-4 py-2 text-xs font-medium uppercase tracking-[1.5px] text-secondary-hover hover:bg-secondary hover:text-background text-center whitespace-nowrap transition-all">
+        <label className="cursor-pointer rounded-md border border-secondary/40 bg-transparent px-4 py-2 text-sm font-medium text-secondary-hover hover:bg-secondary hover:text-background text-center whitespace-nowrap transition-all">
           {importing ? "Importing..." : "Choose File"}
           <input ref={fileRef} type="file" accept=".csv" onChange={handleCSV} disabled={importing} className="hidden" />
         </label>
@@ -365,15 +365,15 @@ export default function GuestsPage() {
           </p>
           <div className="flex flex-wrap gap-2">
             <a href="https://www.canva.com/labels/templates/" target="_blank" rel="noopener noreferrer"
-              className="rounded-md border border-secondary/40 bg-transparent px-3 py-1.5 text-xs font-medium uppercase tracking-[1.5px] text-secondary-hover hover:bg-secondary hover:text-background transition-all text-center">
+              className="rounded-md border border-secondary/40 bg-transparent px-3 py-1.5 text-xs font-medium text-secondary-hover hover:bg-secondary hover:text-background transition-all text-center">
               Canva
             </a>
             <a href="https://www.shutterfly.com/cards-stationery/address-labels/" target="_blank" rel="noopener noreferrer"
-              className="rounded-md border border-secondary/40 bg-transparent px-3 py-1.5 text-xs font-medium uppercase tracking-[1.5px] text-secondary-hover hover:bg-secondary hover:text-background transition-all text-center">
+              className="rounded-md border border-secondary/40 bg-transparent px-3 py-1.5 text-xs font-medium text-secondary-hover hover:bg-secondary hover:text-background transition-all text-center">
               Shutterfly
             </a>
             <a href="https://www.walmart.com/cp/custom-cards-invitations/1702640" target="_blank" rel="noopener noreferrer"
-              className="rounded-md border border-secondary/40 bg-transparent px-3 py-1.5 text-xs font-medium uppercase tracking-[1.5px] text-secondary-hover hover:bg-secondary hover:text-background transition-all text-center">
+              className="rounded-md border border-secondary/40 bg-transparent px-3 py-1.5 text-xs font-medium text-secondary-hover hover:bg-secondary hover:text-background transition-all text-center">
               Walmart Photo
             </a>
           </div>
@@ -386,53 +386,67 @@ export default function GuestsPage() {
           message={guests.length === 0 ? "No guests yet. Add guests manually or import a CSV!" : "No matches found."}
         />
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="overflow-x-auto rounded-lg border border-border/40">
+          {/* Table Header */}
+          <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-3 border-b border-border/60 bg-surface/60 px-4 py-2.5">
+            <span className="text-xs font-medium text-text-muted">Name</span>
+            <span className="text-xs font-medium text-text-muted">Group</span>
+            <span className="text-xs font-medium text-text-muted">Invite</span>
+            <span className="text-xs font-medium text-text-muted">RSVP</span>
+            <span className="text-xs font-medium text-text-muted w-20"></span>
+          </div>
+
+          {/* Table Rows */}
           {filtered.map((g) => (
             <div key={g.id}
-              className="flex flex-col gap-2 rounded-md border border-border/60 border-l-3 border-l-primary/40 bg-background p-4 transition-all hover:shadow-soft"
+              className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-1 sm:gap-3 sm:items-center border-b border-border/30 px-4 py-3 transition-colors hover:bg-surface/50 last:border-b-0"
             >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-lg font-semibold text-text">{g.name}</span>
-                    {g.group_label && (
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs uppercase tracking-wider text-primary">
-                        {g.group_label}
-                      </span>
-                    )}
-                  </div>
-                  {g.address && <div className="text-sm text-text-muted">{g.address.replace(/\n/g, ", ")}</div>}
-                  <div className="flex flex-wrap gap-3 mt-0.5">
-                    {g.email && <span className="text-sm text-text-muted">{g.email}</span>}
-                    {g.phone && <span className="text-sm text-text-muted">{g.phone}</span>}
-                    {g.plus_one_name && <span className="text-sm text-text-muted">+1: {g.plus_one_name}</span>}
-                    {g.meal_choice && <span className="text-sm text-text-muted">Meal: {g.meal_choice}</span>}
-                    {g.dietary_notes && <span className="text-sm text-text-muted">Diet: {g.dietary_notes}</span>}
-                  </div>
+              {/* Name column */}
+              <div className="min-w-0">
+                <span className="font-semibold text-text">{g.name}</span>
+                {g.address && <div className="text-sm text-text-muted truncate">{g.address.replace(/\n/g, ", ")}</div>}
+                <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                  {g.email && <span className="text-xs text-text-muted/70">{g.email}</span>}
+                  {g.phone && <span className="text-xs text-text-muted/70">{g.phone}</span>}
+                  {g.plus_one_name && <span className="text-xs text-text-muted/70">+1: {g.plus_one_name}</span>}
                 </div>
+              </div>
 
-                <div className="flex flex-shrink-0 items-center gap-2">
-                  <button
-                    onClick={() => cycleInvite(g)}
-                    className={`rounded-full px-2.5 py-1 text-xs uppercase tracking-wider transition-all hover:opacity-80 ${INVITE_COLORS[g.invite_status]}`}
-                    title="Click to cycle invite status"
-                  >
-                    {INVITE_LABELS[g.invite_status]}
-                  </button>
-                  <button
-                    onClick={() => cycleRsvp(g)}
-                    className={`rounded-full px-2.5 py-1 text-xs uppercase tracking-wider transition-all hover:opacity-80 ${RSVP_COLORS[g.rsvp_status]}`}
-                    title="Click to cycle RSVP status"
-                  >
-                    {RSVP_LABELS[g.rsvp_status]}
-                  </button>
-                  <Button variant="icon" onClick={() => openEdit(g)} title="Edit">
-                    &#9998;
-                  </Button>
-                  <Button variant="danger" onClick={() => deleteGuest(g.id, g.name)} title="Delete">
-                    &times;
-                  </Button>
-                </div>
+              {/* Group column */}
+              <div className="text-sm text-text-muted">
+                {g.group_label || <span className="text-text-muted/40">—</span>}
+              </div>
+
+              {/* Invite column */}
+              <div>
+                <button
+                  onClick={() => cycleInvite(g)}
+                  className={`rounded-full px-2.5 py-1 text-xs transition-all hover:opacity-80 ${INVITE_COLORS[g.invite_status]}`}
+                  title="Click to cycle invite status"
+                >
+                  {INVITE_LABELS[g.invite_status]}
+                </button>
+              </div>
+
+              {/* RSVP column */}
+              <div>
+                <button
+                  onClick={() => cycleRsvp(g)}
+                  className={`rounded-full px-2.5 py-1 text-xs transition-all hover:opacity-80 ${RSVP_COLORS[g.rsvp_status]}`}
+                  title="Click to cycle RSVP status"
+                >
+                  {RSVP_LABELS[g.rsvp_status]}
+                </button>
+              </div>
+
+              {/* Actions column */}
+              <div className="flex items-center gap-1 w-20 justify-end">
+                <Button variant="icon" onClick={() => openEdit(g)} title="Edit">
+                  &#9998;
+                </Button>
+                <Button variant="danger" onClick={() => deleteGuest(g.id, g.name)} title="Delete">
+                  &times;
+                </Button>
               </div>
             </div>
           ))}
@@ -444,13 +458,13 @@ export default function GuestsPage() {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           {[...new Set(guests.map((g) => g.group_label).filter(Boolean))].sort().map((g) => (
             <button key={g} onClick={() => setSearch(g)}
-              className="rounded-full bg-primary/10 px-3 py-1 text-xs uppercase tracking-wider text-primary hover:bg-primary/20 transition-colors">
+              className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/20 transition-colors">
               {g} ({guests.filter((guest) => guest.group_label === g).length})
             </button>
           ))}
           {(search || filterTab !== "all") && (
             <button onClick={() => { setSearch(""); setFilterTab("all"); }}
-              className="rounded-full bg-border/50 px-3 py-1 text-xs uppercase tracking-wider text-text-muted hover:bg-border transition-colors">
+              className="rounded-full bg-border/50 px-3 py-1 text-xs text-text-muted hover:bg-border transition-colors">
               Clear filters
             </button>
           )}
@@ -493,7 +507,7 @@ export default function GuestsPage() {
 
           {/* Invite & RSVP */}
           <div className="mt-2 border-t border-border pt-3">
-            <p className="mb-2 text-xs uppercase tracking-[1.5px] text-text-muted font-semibold">Invite & RSVP</p>
+            <p className="mb-2 text-sm text-text-muted font-semibold">Invite & RSVP</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Invite Status</Label>
@@ -563,11 +577,11 @@ function StatBox({ label, value, onClick, active, color }: {
     <button
       onClick={onClick}
       className={`rounded-md border p-2.5 text-center transition-all ${
-        active ? "border-primary bg-primary/8 shadow-soft" : "border-border/60 bg-surface/50 hover:border-primary/40"
+        active ? "border-primary bg-primary/5" : "border-border/60 bg-surface/50 hover:border-primary/40"
       }`}
     >
       <span className={`block text-xl font-semibold leading-none mb-0.5 ${color || "text-primary"}`}>{value}</span>
-      <span className="block text-[0.6rem] uppercase tracking-wider text-text-muted leading-tight">{label}</span>
+      <span className="block text-[0.6rem] text-text-muted leading-tight">{label}</span>
     </button>
   );
 }

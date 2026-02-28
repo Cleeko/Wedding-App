@@ -314,7 +314,7 @@ ${letterText.replace(/\n/g, "<br>")}
   // ==========================================
   async function handleSignOut() {
     await signOut();
-    router.push("/");
+    router.push("/login");
   }
 
   // ==========================================
@@ -338,15 +338,15 @@ ${letterText.replace(/\n/g, "<br>")}
       <Card variant="panel" className="mb-4 flex justify-center gap-8">
         <div className="text-center">
           <span className="block text-3xl font-semibold text-primary leading-none mb-1">{total}</span>
-          <span className="text-xs font-medium uppercase tracking-[1.5px] text-text-muted">Total Gifts</span>
+          <span className="text-xs font-medium text-text-muted">Total Gifts</span>
         </div>
         <div className="text-center">
           <span className="block text-3xl font-semibold text-primary leading-none mb-1">{sentCount}</span>
-          <span className="text-xs font-medium uppercase tracking-[1.5px] text-text-muted">Thank Yous Sent</span>
+          <span className="text-xs font-medium text-text-muted">Thank Yous Sent</span>
         </div>
         <div className="text-center">
           <span className="block text-3xl font-semibold text-primary leading-none mb-1">{remaining}</span>
-          <span className="text-xs font-medium uppercase tracking-[1.5px] text-text-muted">Remaining</span>
+          <span className="text-xs font-medium text-text-muted">Remaining</span>
         </div>
       </Card>
 
@@ -371,7 +371,7 @@ ${letterText.replace(/\n/g, "<br>")}
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-5 pb-2.5 pt-3 text-sm uppercase tracking-[2px] border-b-2 transition-colors ${
+            className={`px-5 pb-2.5 pt-3 text-sm tracking-wide border-b-2 transition-colors ${
               activeTab === tab.key
                 ? "text-text border-text"
                 : "text-text-muted border-transparent hover:text-text"

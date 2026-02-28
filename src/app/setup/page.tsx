@@ -23,7 +23,7 @@ export default function SetupPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { router.push("/"); return; }
+    if (!user) { router.push("/login"); return; }
     if (wedding) { router.push("/dashboard"); return; }
   }, [user, wedding, authLoading, router]);
 
