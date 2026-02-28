@@ -6,9 +6,21 @@ export interface Wedding {
   wedding_date: string | null;
 }
 
+export interface Guest {
+  id: string;
+  wedding_id: string;
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+  group_label: string;
+  created_at: string;
+}
+
 export interface Gift {
   id: string;
   wedding_id: string;
+  guest_id: string | null;
   guest_name: string;
   description: string;
   address: string;

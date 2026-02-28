@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import type { Wedding, Gift } from "@/lib/types";
+import type { Wedding, Gift, Guest } from "@/lib/types";
 
 type Tab = "pending" | "sent" | "letter";
 
@@ -18,6 +18,11 @@ export default function DashboardPage() {
   const [busy, setBusy] = useState(false);
   const [slidingId, setSlidingId] = useState<string | null>(null);
   const [slideDir, setSlideDir] = useState<"right" | "left" | null>(null);
+
+  // Guest list (for autocomplete)
+  const [guestList, setGuestList] = useState<Guest[]>([]);
+  const [acResults, setAcResults] = useState<Guest[]>([]);
+  const [acOpen, setAcOpen] = useState(false);
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -44,6 +49,15 @@ export default function DashboardPage() {
     if (data) setGifts(data);
   }, []);
 
+  const fetchGuests = useCallback(async (weddingId: string) => {
+    const { data } = await supabase
+      .from("guests")
+      .select("*")
+      .eq("wedding_id", weddingId)
+      .order("name", { ascending: true });
+    if (data) setGuestList(data);
+  }, []);
+
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -57,11 +71,11 @@ export default function DashboardPage() {
 
       if (!w) { router.push("/setup"); return; }
       setWedding(w);
-      await fetchGifts(w.id);
+      await Promise.all([fetchGifts(w.id), fetchGuests(w.id)]);
       setLoading(false);
     }
     init();
-  }, [router, fetchGifts]);
+  }, [router, fetchGifts, fetchGuests]);
 
   // ==========================================
   // Computed
@@ -140,7 +154,29 @@ export default function DashboardPage() {
     setFormGuest("");
     setFormDesc("");
     setFormAddress("");
+    setAcOpen(false);
+    setAcResults([]);
     setModalOpen(true);
+  }
+
+  function handleGuestInput(value: string) {
+    setFormGuest(value);
+    if (value.trim().length < 2) {
+      setAcOpen(false);
+      setAcResults([]);
+      return;
+    }
+    const q = value.toLowerCase();
+    const matches = guestList.filter((g) => g.name.toLowerCase().includes(q)).slice(0, 8);
+    setAcResults(matches);
+    setAcOpen(matches.length > 0);
+  }
+
+  function selectGuest(guest: Guest) {
+    setFormGuest(guest.name);
+    if (guest.address) setFormAddress(guest.address);
+    setAcOpen(false);
+    setAcResults([]);
   }
 
   function openEdit(g: Gift) {
@@ -448,18 +484,39 @@ export default function DashboardPage() {
             </h2>
 
             <div className="flex flex-col gap-4">
-              <div>
+              <div className="relative">
                 <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">
                   Guest Name
                 </label>
                 <input
                   type="text"
                   value={formGuest}
-                  onChange={(e) => setFormGuest(e.target.value)}
+                  onChange={(e) => handleGuestInput(e.target.value)}
+                  onBlur={() => setTimeout(() => setAcOpen(false), 150)}
                   className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-4 py-3 text-base text-text-dark transition-colors focus:border-dusty-blue focus:outline-none"
                   placeholder="e.g. Aunt Margaret"
                   autoFocus
+                  autoComplete="off"
                 />
+                {acOpen && acResults.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full z-50 max-h-52 overflow-y-auto rounded-b-sm border border-t-0 border-warm-gray bg-parchment shadow-md">
+                    {acResults.map((g) => (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onMouseDown={() => selectGuest(g)}
+                        className="w-full px-4 py-2 text-left transition-colors hover:bg-dusty-blue/8"
+                      >
+                        <span className="block text-base font-medium text-text-dark">{g.name}</span>
+                        {g.address && (
+                          <span className="block text-xs italic text-text-muted truncate">
+                            {g.address.replace(/\n/g, ", ")}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -510,7 +567,13 @@ export default function DashboardPage() {
       )}
 
       {/* Footer */}
-      <div className="mt-8 text-center">
+      <div className="mt-8 flex justify-center gap-6">
+        <button
+          onClick={() => router.push("/guests")}
+          className="text-sm text-text-muted transition-colors hover:text-dusty-blue"
+        >
+          Address Book
+        </button>
         <button
           onClick={handleSignOut}
           className="text-sm text-text-muted transition-colors hover:text-dusty-blue"
