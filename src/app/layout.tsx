@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { EB_Garamond } from "next/font/google";
+import { DM_Serif_Display, DM_Sans } from "next/font/google";
+import { Providers } from "@/lib/providers";
 import "./globals.css";
 
-const ebGaramond = EB_Garamond({
-  variable: "--font-eb-garamond",
+const dmSerifDisplay = DM_Serif_Display({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -21,8 +28,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${ebGaramond.variable} font-serif antialiased`}>
-        {children}
+      <body className={`${dmSerifDisplay.variable} ${dmSans.variable} font-body antialiased`}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

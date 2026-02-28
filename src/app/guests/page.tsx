@@ -3,7 +3,9 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import type { Wedding, Guest, InviteStatus, RsvpStatus } from "@/lib/types";
+import { useRequireAuth } from "@/lib/useRequireAuth";
+import { useToast } from "@/lib/toast";
+import type { Guest, InviteStatus, RsvpStatus } from "@/lib/types";
 
 const INVITE_LABELS: Record<InviteStatus, string> = {
   not_sent: "Not Sent",
@@ -30,7 +32,8 @@ type FilterTab = "all" | "not_sent" | "sent" | "delivered" | "attending" | "decl
 
 export default function GuestsPage() {
   const router = useRouter();
-  const [wedding, setWedding] = useState<Wedding | null>(null);
+  const { wedding, ready } = useRequireAuth();
+  const { toast } = useToast();
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -66,18 +69,9 @@ export default function GuestsPage() {
   }, []);
 
   useEffect(() => {
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/"); return; }
-      const { data: w } = await supabase
-        .from("weddings").select("*").eq("user_id", user.id).single();
-      if (!w) { router.push("/setup"); return; }
-      setWedding(w);
-      await fetchGuests(w.id);
-      setLoading(false);
-    }
-    init();
-  }, [router, fetchGuests]);
+    if (!ready || !wedding) return;
+    fetchGuests(wedding.id).then(() => setLoading(false));
+  }, [ready, wedding, fetchGuests]);
 
   // ==========================================
   // Stats
@@ -116,15 +110,25 @@ export default function GuestsPage() {
   async function cycleInvite(g: Guest) {
     const next: InviteStatus =
       g.invite_status === "not_sent" ? "sent" : g.invite_status === "sent" ? "delivered" : "not_sent";
-    await supabase.from("guests").update({ invite_status: next }).eq("id", g.id);
-    await fetchGuests(wedding!.id);
+    const prevGuests = guests;
+    setGuests((prev) => prev.map((guest) => guest.id === g.id ? { ...guest, invite_status: next } : guest));
+    const { error } = await supabase.from("guests").update({ invite_status: next }).eq("id", g.id);
+    if (error) {
+      setGuests(prevGuests);
+      toast("Failed to update invite status: " + error.message, "error");
+    }
   }
 
   async function cycleRsvp(g: Guest) {
     const next: RsvpStatus =
       g.rsvp_status === "no_response" ? "attending" : g.rsvp_status === "attending" ? "declined" : "no_response";
-    await supabase.from("guests").update({ rsvp_status: next }).eq("id", g.id);
-    await fetchGuests(wedding!.id);
+    const prevGuests = guests;
+    setGuests((prev) => prev.map((guest) => guest.id === g.id ? { ...guest, rsvp_status: next } : guest));
+    const { error } = await supabase.from("guests").update({ rsvp_status: next }).eq("id", g.id);
+    if (error) {
+      setGuests(prevGuests);
+      toast("Failed to update RSVP: " + error.message, "error");
+    }
   }
 
   // ==========================================
@@ -149,7 +153,7 @@ export default function GuestsPage() {
   }
 
   async function saveGuest() {
-    if (!formName.trim()) { alert("Please enter a guest name."); return; }
+    if (!formName.trim()) { toast("Please enter a guest name.", "error"); return; }
     setSaving(true);
     const payload = {
       name: formName.trim(), address: formAddress.trim(), email: formEmail.trim(),
@@ -159,19 +163,31 @@ export default function GuestsPage() {
       dietary_notes: formDietary.trim(),
     };
     if (editingId) {
-      await supabase.from("guests").update(payload).eq("id", editingId);
+      const { data, error } = await supabase.from("guests").update(payload).eq("id", editingId).select().single();
+      if (error) { toast("Failed to save guest: " + error.message, "error"); setSaving(false); return; }
+      setGuests((prev) => prev.map((g) => g.id === editingId ? data : g));
+      toast("Guest updated", "success");
     } else {
-      await supabase.from("guests").insert({ ...payload, wedding_id: wedding!.id });
+      const { data, error } = await supabase.from("guests").insert({ ...payload, wedding_id: wedding!.id }).select().single();
+      if (error) { toast("Failed to add guest: " + error.message, "error"); setSaving(false); return; }
+      setGuests((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+      toast("Guest added!", "success");
     }
-    await fetchGuests(wedding!.id);
     setModalOpen(false);
     setSaving(false);
   }
 
   async function deleteGuest(id: string, name: string) {
     if (!confirm(`Remove ${name} from your guest list?`)) return;
-    await supabase.from("guests").delete().eq("id", id);
-    await fetchGuests(wedding!.id);
+    const prevGuests = guests;
+    setGuests((prev) => prev.filter((g) => g.id !== id));
+    const { error } = await supabase.from("guests").delete().eq("id", id);
+    if (error) {
+      setGuests(prevGuests);
+      toast("Failed to remove guest: " + error.message, "error");
+    } else {
+      toast("Guest removed", "info");
+    }
   }
 
   // ==========================================
@@ -218,7 +234,7 @@ export default function GuestsPage() {
   function exportAddressCSV() {
     const guestsWithAddress = guests.filter((g) => g.address.trim());
     if (guestsWithAddress.length === 0) {
-      alert("No guests have addresses to export.");
+      toast("No guests have addresses to export.", "info");
       return;
     }
     const header = "Name,Address Line 1,Address Line 2";
@@ -241,7 +257,7 @@ export default function GuestsPage() {
   }
 
   function exportFullCSV() {
-    if (guests.length === 0) { alert("No guests to export."); return; }
+    if (guests.length === 0) { toast("No guests to export.", "info"); return; }
     const header = "Name,Address,Email,Phone,Group,Invite Status,RSVP,Plus One,Meal Choice,Dietary Notes";
     const rows = guests.map((g) =>
       [g.name, g.address.replace(/\n/g, ", "), g.email, g.phone, g.group_label,
@@ -262,7 +278,7 @@ export default function GuestsPage() {
   // ==========================================
   // Loading
   // ==========================================
-  if (loading) {
+  if (!ready || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">

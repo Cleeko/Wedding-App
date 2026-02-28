@@ -1,21 +1,50 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-parchment: #f5f3f0;
-  --color-parchment-dark: #eae7e2;
-  --color-warm-gray: #e2dfda;
-  --color-dusty-blue: #7a9bb5;
-  --color-dusty-blue-light: #a8c4d8;
-  --color-dusty-blue-hover: #6388a4;
-  --color-sage: #8fa88b;
-  --color-sage-hover: #778f73;
-  --color-text-dark: #231f20;
-  --color-text-muted: #5a5658;
-  --font-serif: 'EB Garamond', 'Georgia', 'Times New Roman', serif;
+  /* ========================================
+     DESIGN SYSTEM: Champagne Toast
+     Palette: Warm amber + dusty rose
+     Typography: DM Serif Display + DM Sans
+     ======================================== */
+
+  /* --- Semantic Colors --- */
+  --color-background: #FBF9F5;
+  --color-surface: #F0ECE5;
+  --color-border: #DDD7CD;
+  --color-primary: #B8915A;
+  --color-primary-hover: #A37D4A;
+  --color-secondary: #C4868E;
+  --color-secondary-hover: #AD7079;
+  --color-accent: #5A524B;
+  --color-text: #2C2724;
+  --color-text-muted: #8A8078;
+  --color-error: #C0392B;
+  --color-success: #5B8C5A;
+  --color-warning: #D4A843;
+
+  /* --- Legacy Aliases (map old names → new values) --- */
+  --color-parchment: #FBF9F5;
+  --color-parchment-dark: #F0ECE5;
+  --color-warm-gray: #DDD7CD;
+  --color-dusty-blue: #B8915A;
+  --color-dusty-blue-light: #C9A76C;
+  --color-dusty-blue-hover: #A37D4A;
+  --color-sage: #C4868E;
+  --color-sage-hover: #AD7079;
+  --color-text-dark: #2C2724;
+
+  /* --- Typography --- */
+  --font-heading: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+
+  /* --- Shadows --- */
+  --shadow-soft: 0 1px 3px rgba(44, 39, 36, 0.06), 0 1px 2px rgba(44, 39, 36, 0.04);
+  --shadow-card: 0 4px 12px rgba(44, 39, 36, 0.06), 0 1px 3px rgba(44, 39, 36, 0.04);
+  --shadow-elevated: 0 8px 24px rgba(44, 39, 36, 0.08), 0 2px 6px rgba(44, 39, 36, 0.04);
 }
 
 body {
-  background-color: var(--color-parchment-dark);
-  color: var(--color-text-dark);
-  font-family: var(--font-serif);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
 }

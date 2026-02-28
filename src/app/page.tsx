@@ -1,19 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/lib/auth";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/Card";
+import { Label } from "@/components/Label";
+import { Input } from "@/components/Input";
+import { Button } from "@/components/Button";
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
 
-  // Redirect if already logged in
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) router.push("/dashboard");
-    });
-  }, [router]);
+    if (!authLoading && user) router.push("/dashboard");
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    const authError = searchParams.get("error");
+    if (authError) setError("Authentication failed. Please try again.");
+  }, [searchParams]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,87 +70,79 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-normal uppercase tracking-[6px] text-text-dark">
-            Thank You Tracker
-          </h1>
-          <p className="mt-2 text-lg italic text-text-muted tracking-wider">
-            Wedding Gift Management
-          </p>
+        <div className="mb-8">
+          <PageHeader
+            title="Thank You Tracker"
+            subtitle="Wedding Gift Management"
+          />
         </div>
 
-        {/* Card */}
-        <div className="rounded-sm border border-dusty-blue/15 bg-gradient-to-br from-parchment to-parchment-dark p-8 shadow-md">
-          <h2 className="mb-6 text-center text-xl font-normal tracking-wider uppercase text-text-dark">
+        <Card variant="form">
+          <h2 className="mb-6 text-center text-xl font-heading tracking-wider text-text">
             {isSignUp ? "Create Account" : "Sign In"}
           </h2>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">
-                Email
-              </label>
-              <input
+              <Label>Email</Label>
+              <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-4 py-3 text-base text-text-dark transition-colors focus:border-dusty-blue focus:outline-none"
                 placeholder="your@email.com"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-xs uppercase tracking-[1.5px] text-text-muted">
-                Password
-              </label>
-              <input
+              <Label>Password</Label>
+              <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full rounded-sm border border-warm-gray bg-parchment-dark px-4 py-3 text-base text-text-dark transition-colors focus:border-dusty-blue focus:outline-none"
                 placeholder="At least 6 characters"
               />
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 text-center">{error}</p>
+              <p className="text-sm text-error text-center">{error}</p>
             )}
             {message && (
-              <p className="text-sm text-sage text-center">{message}</p>
+              <p className="text-sm text-success text-center">{message}</p>
             )}
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="mt-2 w-full rounded-sm bg-dusty-blue px-6 py-3 text-sm uppercase tracking-[2px] text-parchment transition-all hover:bg-dusty-blue-hover hover:-translate-y-px hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+              size="lg"
+              fullWidth
+              className="mt-2"
             >
               {loading
                 ? "Please wait..."
                 : isSignUp
                 ? "Create Account"
                 : "Sign In"}
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6 text-center">
-            <button
+            <Button
+              variant="link"
               onClick={() => {
                 setIsSignUp(!isSignUp);
                 setError("");
                 setMessage("");
               }}
-              className="text-sm text-text-muted transition-colors hover:text-dusty-blue"
             >
               {isSignUp
                 ? "Already have an account? Sign in"
                 : "Need an account? Create one"}
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
