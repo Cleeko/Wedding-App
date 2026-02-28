@@ -213,6 +213,53 @@ export default function GuestsPage() {
   }
 
   // ==========================================
+  // CSV Export
+  // ==========================================
+  function exportAddressCSV() {
+    const guestsWithAddress = guests.filter((g) => g.address.trim());
+    if (guestsWithAddress.length === 0) {
+      alert("No guests have addresses to export.");
+      return;
+    }
+    const header = "Name,Address Line 1,Address Line 2";
+    const rows = guestsWithAddress.map((g) => {
+      const lines = g.address.split(/\n/).map((l) => l.trim()).filter(Boolean);
+      const line1 = lines[0] || "";
+      const line2 = lines.slice(1).join(", ");
+      return [g.name, line1, line2]
+        .map((v) => `"${v.replace(/"/g, '""')}"`)
+        .join(",");
+    });
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "guest-addresses.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportFullCSV() {
+    if (guests.length === 0) { alert("No guests to export."); return; }
+    const header = "Name,Address,Email,Phone,Group,Invite Status,RSVP,Plus One,Meal Choice,Dietary Notes";
+    const rows = guests.map((g) =>
+      [g.name, g.address.replace(/\n/g, ", "), g.email, g.phone, g.group_label,
+       g.invite_status, g.rsvp_status, g.plus_one_name, g.meal_choice, g.dietary_notes]
+        .map((v) => `"${(v || "").replace(/"/g, '""')}"`)
+        .join(",")
+    );
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "guest-list-full.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ==========================================
   // Loading
   // ==========================================
   if (loading) {
@@ -277,6 +324,48 @@ export default function GuestsPage() {
         <p className={`-mt-4 mb-4 text-sm text-center ${importResult.includes("mport") && !importResult.includes("fail") ? "text-sage" : "text-red-600"}`}>
           {importResult}
         </p>
+      )}
+
+      {/* Export & Print */}
+      {guests.length > 0 && (
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center rounded-sm border border-warm-gray/60 bg-parchment/50 p-4">
+          <p className="flex-1 text-sm text-text-muted">
+            <strong>Export & Print</strong>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={exportAddressCSV}
+              className="rounded-sm border border-dusty-blue-light bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-dusty-blue hover:bg-dusty-blue hover:text-parchment transition-all">
+              Address Labels CSV
+            </button>
+            <button onClick={exportFullCSV}
+              className="rounded-sm border border-dusty-blue-light bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-dusty-blue hover:bg-dusty-blue hover:text-parchment transition-all">
+              Full Guest List CSV
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Print Service Links */}
+      {guests.length > 0 && (
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center rounded-sm border border-warm-gray/60 bg-parchment/50 p-4">
+          <p className="flex-1 text-sm text-text-muted">
+            <strong>Print Labels</strong> — Export CSV above, then upload to:
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a href="https://www.canva.com/labels/templates/" target="_blank" rel="noopener noreferrer"
+              className="rounded-sm border border-sage bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-sage-hover hover:bg-sage hover:text-parchment transition-all text-center">
+              Canva
+            </a>
+            <a href="https://www.shutterfly.com/cards-stationery/address-labels/" target="_blank" rel="noopener noreferrer"
+              className="rounded-sm border border-sage bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-sage-hover hover:bg-sage hover:text-parchment transition-all text-center">
+              Shutterfly
+            </a>
+            <a href="https://www.walmart.com/cp/custom-cards-invitations/1702640" target="_blank" rel="noopener noreferrer"
+              className="rounded-sm border border-sage bg-transparent px-3 py-1.5 text-xs uppercase tracking-[1.5px] text-sage-hover hover:bg-sage hover:text-parchment transition-all text-center">
+              Walmart Photo
+            </a>
+          </div>
+        </div>
       )}
 
       {/* Guest List */}

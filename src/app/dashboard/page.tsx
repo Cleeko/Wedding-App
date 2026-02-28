@@ -249,6 +249,23 @@ export default function DashboardPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function printLetter() {
+    if (!letterText) return;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    printWindow.document.write(`<!DOCTYPE html>
+<html><head><title>Thank You Letter</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'EB Garamond', Georgia, serif; font-size: 16pt; line-height: 1.8; color: #231f20; max-width: 6.5in; margin: 1in auto; padding: 0; }
+  @media print { body { margin: 0; max-width: 100%; } }
+</style></head><body>
+${letterText.replace(/\n/g, "<br>")}
+</body></html>`);
+    printWindow.document.close();
+    printWindow.onload = () => { printWindow.print(); };
+  }
+
   // ==========================================
   // Sign out
   // ==========================================
@@ -462,12 +479,20 @@ export default function DashboardPage() {
           />
 
           {letterText && (
-            <button
-              onClick={copyLetter}
-              className="self-start rounded-sm bg-dusty-blue px-5 py-2.5 text-sm uppercase tracking-[2px] text-parchment transition-all hover:bg-dusty-blue-hover hover:-translate-y-px hover:shadow-lg"
-            >
-              {copied ? "Copied!" : "Copy Letter to Clipboard"}
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={copyLetter}
+                className="rounded-sm bg-dusty-blue px-5 py-2.5 text-sm uppercase tracking-[2px] text-parchment transition-all hover:bg-dusty-blue-hover hover:-translate-y-px hover:shadow-lg"
+              >
+                {copied ? "Copied!" : "Copy Letter to Clipboard"}
+              </button>
+              <button
+                onClick={printLetter}
+                className="rounded-sm border border-dusty-blue-light bg-transparent px-5 py-2.5 text-sm uppercase tracking-[2px] text-dusty-blue transition-all hover:bg-dusty-blue hover:text-parchment hover:-translate-y-px hover:shadow-lg"
+              >
+                Print Letter
+              </button>
+            </div>
           )}
         </div>
       )}
