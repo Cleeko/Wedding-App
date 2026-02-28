@@ -6,6 +6,9 @@ export interface Wedding {
   wedding_date: string | null;
 }
 
+export type InviteStatus = "not_sent" | "sent" | "delivered";
+export type RsvpStatus = "no_response" | "attending" | "declined";
+
 export interface Guest {
   id: string;
   wedding_id: string;
@@ -14,6 +17,11 @@ export interface Guest {
   email: string;
   phone: string;
   group_label: string;
+  invite_status: InviteStatus;
+  rsvp_status: RsvpStatus;
+  meal_choice: string;
+  plus_one_name: string;
+  dietary_notes: string;
   created_at: string;
 }
 
