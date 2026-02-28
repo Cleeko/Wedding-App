@@ -20,15 +20,15 @@ import { EmptyState } from "@/components/EmptyState";
    ============================================================ */
 const INVITE_LABELS: Record<InviteStatus, string> = { not_sent: "Not Sent", sent: "Sent", delivered: "Delivered" };
 const INVITE_COLORS: Record<InviteStatus, string> = {
-  not_sent: "bg-border/60 text-text-muted",
-  sent: "bg-primary/15 text-primary",
-  delivered: "bg-success/15 text-success",
+  not_sent: "bg-surface text-accent border border-border",
+  sent: "bg-primary/15 text-primary-hover font-medium",
+  delivered: "bg-success/20 text-success font-medium",
 };
 const RSVP_LABELS: Record<RsvpStatus, string> = { no_response: "No Response", attending: "Attending", declined: "Declined" };
 const RSVP_COLORS: Record<RsvpStatus, string> = {
-  no_response: "bg-border/60 text-text-muted",
-  attending: "bg-success/15 text-success",
-  declined: "bg-error/10 text-error",
+  no_response: "bg-surface text-accent border border-border",
+  attending: "bg-success/20 text-success font-medium",
+  declined: "bg-error/15 text-error font-medium",
 };
 
 /* ============================================================
@@ -424,7 +424,7 @@ export default function DashboardPage() {
       />
 
       {/* ========== MAIN TABS ========== */}
-      <nav className="mb-6 flex w-full border-b border-border">
+      <nav className="mb-6 flex w-full rounded-lg bg-card p-1 shadow-card">
         {([
           { key: "guests" as MainTab, label: "Guest List", count: guests.length },
           { key: "gifts" as MainTab, label: "Gift Tracker", count: gifts.length },
@@ -433,15 +433,17 @@ export default function DashboardPage() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 px-4 pb-2.5 pt-3 text-sm tracking-wide border-b-2 transition-colors ${
+            className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium tracking-wide transition-all ${
               activeTab === tab.key
-                ? "text-text border-primary"
-                : "text-text-muted border-transparent hover:text-text"
+                ? "bg-primary text-white shadow-soft"
+                : "text-text-muted hover:text-text hover:bg-surface/80"
             }`}
           >
             {tab.label}
             {tab.count !== null && (
-              <span className="ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/12 px-1.5 text-xs font-semibold text-primary align-middle">
+              <span className={`ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold align-middle ${
+                activeTab === tab.key ? "bg-white/25 text-white" : "bg-primary/12 text-primary"
+              }`}>
                 {tab.count}
               </span>
             )}
@@ -456,13 +458,13 @@ export default function DashboardPage() {
         <div>
           {/* Stats */}
           {guests.length > 0 && (
-            <div className="mb-5 grid grid-cols-3 gap-3 sm:grid-cols-6">
+            <div className="mb-5 grid grid-cols-3 gap-2.5 sm:grid-cols-6">
               <StatBox label="Total" value={guestStats.total} onClick={() => setGuestFilter("all")} active={guestFilter === "all"} />
-              <StatBox label="Inv. Not Sent" value={guestStats.invNotSent} onClick={() => setGuestFilter("not_sent")} active={guestFilter === "not_sent"} color="text-text-muted" />
+              <StatBox label="Inv. Not Sent" value={guestStats.invNotSent} onClick={() => setGuestFilter("not_sent")} active={guestFilter === "not_sent"} color="text-accent" />
               <StatBox label="Inv. Sent" value={guestStats.invSent} onClick={() => setGuestFilter("sent")} active={guestFilter === "sent"} color="text-primary" />
               <StatBox label="Attending" value={guestStats.rsvpAttending} onClick={() => setGuestFilter("attending")} active={guestFilter === "attending"} color="text-success" />
               <StatBox label="Declined" value={guestStats.rsvpDeclined} onClick={() => setGuestFilter("declined")} active={guestFilter === "declined"} color="text-error" />
-              <StatBox label="No RSVP" value={guestStats.rsvpNoResponse} onClick={() => setGuestFilter("no_response")} active={guestFilter === "no_response"} color="text-text-muted" />
+              <StatBox label="No RSVP" value={guestStats.rsvpNoResponse} onClick={() => setGuestFilter("no_response")} active={guestFilter === "no_response"} color="text-accent" />
             </div>
           )}
 
@@ -473,9 +475,9 @@ export default function DashboardPage() {
           </div>
 
           {/* CSV Import */}
-          <Card variant="panel" className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <p className="flex-1 text-sm text-text-muted">
-              <strong>Import CSV</strong> — Name (required), Address, Email, Phone, Group
+          <Card variant="panel" className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center !bg-card !border-border shadow-soft">
+            <p className="flex-1 text-sm text-accent">
+              <strong className="text-text">Import CSV</strong> — Name (required), Address, Email, Phone, Group
             </p>
             <label className="cursor-pointer rounded-md border border-secondary/40 bg-transparent px-4 py-2 text-sm font-medium text-secondary-hover hover:bg-secondary hover:text-background text-center whitespace-nowrap transition-all">
               {importing ? "Importing..." : "Choose File"}
@@ -490,8 +492,8 @@ export default function DashboardPage() {
 
           {/* Export */}
           {guests.length > 0 && (
-            <Card variant="panel" className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <p className="flex-1 text-sm text-text-muted"><strong>Export</strong></p>
+            <Card variant="panel" className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center !bg-card !border-border shadow-soft">
+              <p className="flex-1 text-sm text-accent"><strong className="text-text">Export</strong></p>
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" onClick={exportAddressCSV}>Address Labels CSV</Button>
                 <Button variant="outline" size="sm" onClick={exportFullCSV}>Full Guest List CSV</Button>
@@ -503,20 +505,20 @@ export default function DashboardPage() {
           {filteredGuests.length === 0 ? (
             <EmptyState message={guests.length === 0 ? "No guests yet. Add guests manually or import a CSV!" : "No matches found."} />
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-border/60">
+            <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-card">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-border/60 bg-surface/60">
-                    <th className="px-4 py-3"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted">Name</span></th>
-                    <th className="hidden px-4 py-3 sm:table-cell"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted">Group</span></th>
-                    <th className="px-4 py-3"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted">Invite</span></th>
-                    <th className="px-4 py-3"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted">RSVP</span></th>
-                    <th className="px-4 py-3 text-right"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted">Actions</span></th>
+                  <tr className="border-b border-border bg-surface">
+                    <th className="px-4 py-3"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">Name</span></th>
+                    <th className="hidden px-4 py-3 sm:table-cell"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">Group</span></th>
+                    <th className="px-4 py-3"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">Invite</span></th>
+                    <th className="px-4 py-3"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">RSVP</span></th>
+                    <th className="px-4 py-3 text-right"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredGuests.map((g) => (
-                    <tr key={g.id} className="border-b border-border/30 transition-colors hover:bg-surface/40 last:border-b-0">
+                    <tr key={g.id} className="border-b border-border/40 transition-colors hover:bg-surface/60 last:border-b-0">
                       <td className="px-4 py-3">
                         <span className="font-medium text-text">{g.name}</span>
                         {g.address && <div className="text-xs text-text-muted truncate max-w-[220px]">{g.address.replace(/\n/g, ", ")}</div>}
@@ -560,7 +562,7 @@ export default function DashboardPage() {
           {[...new Set(guests.map((g) => g.group_label).filter(Boolean))].sort().length > 0 && (
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               {[...new Set(guests.map((g) => g.group_label).filter(Boolean))].sort().map((g) => (
-                <button key={g} onClick={() => setGuestSearch(g)} className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/20 transition-colors">
+                <button key={g} onClick={() => setGuestSearch(g)} className="rounded-full bg-card border border-primary/30 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10 hover:border-primary/50 shadow-soft transition-colors">
                   {g} ({guests.filter((x) => x.group_label === g).length})
                 </button>
               ))}
@@ -580,25 +582,27 @@ export default function DashboardPage() {
       {activeTab === "gifts" && (
         <div>
           {/* Stats + Progress */}
-          <div className="mb-4 flex items-center justify-center gap-8 rounded-md border border-border/40 bg-surface/50 p-4">
+          <div className="mb-4 flex items-center justify-center gap-8 rounded-lg border border-border bg-card p-5 shadow-card">
             <div className="text-center">
               <span className="block text-3xl font-semibold text-primary leading-none mb-1">{giftTotal}</span>
-              <span className="text-xs font-medium text-text-muted">Total Gifts</span>
+              <span className="text-xs font-medium text-accent">Total Gifts</span>
             </div>
+            <div className="h-8 w-px bg-border" />
             <div className="text-center">
-              <span className="block text-3xl font-semibold text-primary leading-none mb-1">{giftSent}</span>
-              <span className="text-xs font-medium text-text-muted">Thank Yous Sent</span>
+              <span className="block text-3xl font-semibold text-success leading-none mb-1">{giftSent}</span>
+              <span className="text-xs font-medium text-accent">Thank Yous Sent</span>
             </div>
+            <div className="h-8 w-px bg-border" />
             <div className="text-center">
-              <span className="block text-3xl font-semibold text-primary leading-none mb-1">{giftRemaining}</span>
-              <span className="text-xs font-medium text-text-muted">Remaining</span>
+              <span className="block text-3xl font-semibold text-secondary leading-none mb-1">{giftRemaining}</span>
+              <span className="text-xs font-medium text-accent">Remaining</span>
             </div>
           </div>
           <div className="mb-6 text-center">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-surface border border-border">
               <div className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-500" style={{ width: `${giftPct}%` }} />
             </div>
-            <span className="mt-1 inline-block text-sm text-text-muted">{giftPct}% complete</span>
+            <span className="mt-1.5 inline-block text-sm font-medium text-accent">{giftPct}% complete</span>
           </div>
 
           {/* Toolbar */}
@@ -606,7 +610,7 @@ export default function DashboardPage() {
             <Input type="text" value={giftSearch} onChange={(e) => setGiftSearch(e.target.value)} placeholder="Search guests, gifts, or addresses..." className="flex-1" />
             <div className="flex gap-2">
               {(["all", "pending", "sent"] as GiftFilter[]).map((f) => (
-                <button key={f} onClick={() => setGiftFilter(f)} className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${giftFilter === f ? "bg-primary text-background" : "bg-surface text-text-muted hover:bg-border/60"}`}>
+                <button key={f} onClick={() => setGiftFilter(f)} className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all border ${giftFilter === f ? "bg-primary text-white border-primary shadow-soft" : "bg-card text-accent border-border hover:border-primary/50"}`}>
                   {f === "all" ? `All (${giftTotal})` : f === "pending" ? `Pending (${giftRemaining})` : `Sent (${giftSent})`}
                 </button>
               ))}
@@ -618,34 +622,34 @@ export default function DashboardPage() {
           {filteredGifts.length === 0 ? (
             <EmptyState message={gifts.length === 0 ? "No gifts yet. Add your first gift to get started!" : "No matches found."} />
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-border/60">
+            <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-card">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-border/60 bg-surface/60">
+                  <tr className="border-b border-border bg-surface">
                     <th className="w-12 px-4 py-3 text-center">
-                      <button onClick={() => toggleGiftSort("thank_you_sent")} className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted hover:text-text transition-colors" title="Sort by status">
+                      <button onClick={() => toggleGiftSort("thank_you_sent")} className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent hover:text-text transition-colors" title="Sort by status">
                         Sent<SortInd col="thank_you_sent" />
                       </button>
                     </th>
                     <th className="px-4 py-3">
-                      <button onClick={() => toggleGiftSort("guest_name")} className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted hover:text-text transition-colors">
+                      <button onClick={() => toggleGiftSort("guest_name")} className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent hover:text-text transition-colors">
                         Guest<SortInd col="guest_name" />
                       </button>
                     </th>
                     <th className="px-4 py-3">
-                      <button onClick={() => toggleGiftSort("description")} className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted hover:text-text transition-colors">
+                      <button onClick={() => toggleGiftSort("description")} className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent hover:text-text transition-colors">
                         Gift<SortInd col="description" />
                       </button>
                     </th>
-                    <th className="hidden px-4 py-3 md:table-cell"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted">Address</span></th>
-                    <th className="px-4 py-3 text-right"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-text-muted">Actions</span></th>
+                    <th className="hidden px-4 py-3 md:table-cell"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">Address</span></th>
+                    <th className="px-4 py-3 text-right"><span className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredGifts.map((g) => (
-                    <tr key={g.id} className="border-b border-border/30 transition-colors hover:bg-surface/40 last:border-b-0">
+                    <tr key={g.id} className="border-b border-border/40 transition-colors hover:bg-surface/60 last:border-b-0">
                       <td className="px-4 py-3 text-center">
-                        <button onClick={() => toggleThankYou(g.id, g.thank_you_sent)} className={`inline-flex h-6 w-6 items-center justify-center rounded-md border-2 transition-all ${g.thank_you_sent ? "border-success bg-success text-background" : "border-border hover:border-primary/50"}`} title={g.thank_you_sent ? "Mark as not sent" : "Mark as sent"}>
+                        <button onClick={() => toggleThankYou(g.id, g.thank_you_sent)} className={`inline-flex h-6 w-6 items-center justify-center rounded-md border-2 transition-all ${g.thank_you_sent ? "border-success bg-success text-white shadow-soft" : "border-border bg-card hover:border-primary"}`} title={g.thank_you_sent ? "Mark as not sent" : "Mark as sent"}>
                           {g.thank_you_sent && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="h-3.5 w-3.5"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                         </button>
                       </td>
@@ -682,7 +686,7 @@ export default function DashboardPage() {
          ╚══════════════════════════════════════════╝ */}
       {activeTab === "letter" && (
         <div className="flex flex-col gap-5">
-          <div>
+          <div className="rounded-lg border border-border bg-card p-5 shadow-card">
             <Label>Select a guest</Label>
             <Select value={letterGiftId} onChange={(e) => changeLetterGift(e.target.value)}>
               <option value="">-- Choose a guest --</option>
@@ -704,7 +708,7 @@ export default function DashboardPage() {
             onChange={(e) => setLetterText(e.target.value)}
             placeholder="Select a guest above to generate a thank you letter..."
             rows={10}
-            className="w-full min-h-[260px] rounded-lg border border-border bg-background px-8 py-6 font-heading text-lg leading-relaxed text-text resize-y focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
+            className="w-full min-h-[260px] rounded-lg border border-border bg-card px-8 py-6 font-heading text-lg leading-relaxed text-text shadow-card resize-y focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
 
           {letterText && (
@@ -814,9 +818,9 @@ function StatBox({ label, value, onClick, active, color }: {
   label: string; value: number; onClick: () => void; active: boolean; color?: string;
 }) {
   return (
-    <button onClick={onClick} className={`rounded-md border p-2.5 text-center transition-all ${active ? "border-primary bg-primary/5" : "border-border/60 bg-surface/50 hover:border-primary/40"}`}>
+    <button onClick={onClick} className={`rounded-lg border p-2.5 text-center transition-all ${active ? "border-primary bg-card shadow-card ring-1 ring-primary/20" : "border-border bg-card shadow-soft hover:border-primary/50 hover:shadow-card"}`}>
       <span className={`block text-xl font-semibold leading-none mb-0.5 ${color || "text-primary"}`}>{value}</span>
-      <span className="block text-[0.6rem] text-text-muted leading-tight">{label}</span>
+      <span className="block text-[0.6rem] text-accent leading-tight font-medium">{label}</span>
     </button>
   );
 }
