@@ -27,7 +27,7 @@
   --font-body: 'DM Sans', system-ui, sans-serif;
 
   /* --- Card / white surface --- */
-  --color-card: #FFFFFF;
+  --color-card: #FDFCFA;
 
   /* --- Shadows --- */
   --shadow-soft: 0 1px 3px rgba(44, 39, 36, 0.08), 0 1px 2px rgba(44, 39, 36, 0.06);
@@ -116,6 +116,65 @@ body {
 
 /* Staggered children */
 .stagger-children > * { transition-delay: calc(var(--i, 0) * 100ms); }
+
+/* ========================================
+   Floral / Botanical Animations
+   ======================================== */
+
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(1.5deg); }
+  75%      { transform: rotate(-1.5deg); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  33%      { transform: translate(4px, -3px); }
+  66%      { transform: translate(-3px, 2px); }
+}
+
+@keyframes draw-in {
+  from { stroke-dashoffset: 1000; opacity: 0.3; }
+  to   { stroke-dashoffset: 0;    opacity: 1; }
+}
+
+@keyframes floral-fade {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes unfurl {
+  from { opacity: 0; transform: rotate(-8deg) scale(0.8); }
+  to   { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
+/* Floral utility classes — scroll-triggered reveal */
+.floral-element {
+  opacity: 0;
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.floral-element.floral-visible {
+  opacity: 1;
+}
+
+/* Prefers reduced motion — disable continuous + reveal animations */
+@media (prefers-reduced-motion: reduce) {
+  .floral-element,
+  .floral-element.floral-visible {
+    animation: none !important;
+    transition: opacity 0.3s ease !important;
+  }
+  .reveal, .reveal-left, .reveal-right {
+    transition: opacity 0.3s ease !important;
+    transform: none !important;
+  }
+}
+
+/* Hide large florals on small screens */
+@media (max-width: 640px) {
+  .floral-hide-mobile { display: none !important; }
+}
 
 /* Smooth scroll */
 html { scroll-behavior: smooth; }

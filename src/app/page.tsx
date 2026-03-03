@@ -4,6 +4,14 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/Button";
+import {
+  FloralCornerFrame,
+  EucalyptusSpray,
+  DelicateVine,
+  PeonyCluster,
+  SingleLeafSprig,
+  SectionDivider,
+} from "@/components/FloralElements";
 
 /* ============================================================
    Scroll-triggered reveal hook
@@ -57,7 +65,6 @@ const FEATURES = [
     ),
     title: "Gift Tracking",
     desc: "Log every gift as it arrives with guest name, description, and address. Search and filter instantly.",
-    span: "sm:col-span-1",
   },
   {
     icon: (
@@ -68,7 +75,6 @@ const FEATURES = [
     ),
     title: "Thank You Letters",
     desc: "Generate personalized letters in one click. Copy to clipboard or print on beautiful stationery.",
-    span: "sm:col-span-1",
   },
   {
     icon: (
@@ -78,7 +84,6 @@ const FEATURES = [
     ),
     title: "Guest Management",
     desc: "Full address book with invite tracking, RSVP status, meal choices, dietary notes, and plus-ones.",
-    span: "sm:col-span-1",
   },
   {
     icon: (
@@ -89,7 +94,6 @@ const FEATURES = [
     ),
     title: "CSV Import & Export",
     desc: "Bulk import your guest list. Export address labels ready for Canva, Shutterfly, or Walmart Photo.",
-    span: "sm:col-span-1",
   },
   {
     icon: (
@@ -100,7 +104,6 @@ const FEATURES = [
     ),
     title: "Progress Tracking",
     desc: "See exactly how many thank yous are left. A progress bar keeps you motivated to finish.",
-    span: "sm:col-span-1",
   },
   {
     icon: (
@@ -110,7 +113,6 @@ const FEATURES = [
     ),
     title: "Private & Secure",
     desc: "Your data is protected with row-level security. Only you can see your gifts and guests.",
-    span: "sm:col-span-1",
   },
 ];
 
@@ -195,11 +197,44 @@ export default function LandingPage() {
       </nav>
 
       {/* ============== HERO ============== */}
-      <section className="relative flex min-h-[90vh] flex-col items-center justify-center px-6 pt-24 text-center">
+      <section className="relative flex min-h-[90vh] flex-col items-center justify-center bg-background px-6 pt-24 text-center">
         {/* Decorative gradient orbs */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-primary/[0.06] blur-3xl" />
           <div className="absolute -bottom-24 right-1/4 h-80 w-80 rounded-full bg-secondary/[0.08] blur-3xl" />
+        </div>
+
+        {/* Floral corner frames */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <FloralCornerFrame
+            className="floral-hide-mobile absolute -top-4 -left-4 w-48 text-primary/[0.06]"
+            style={{ animation: "sway 12s ease-in-out infinite", transformOrigin: "top left" }}
+          />
+          <FloralCornerFrame
+            className="floral-hide-mobile absolute -top-4 -right-4 w-48 text-secondary/[0.06]"
+            style={{ animation: "sway 14s ease-in-out infinite", transformOrigin: "top right", transform: "scaleX(-1)" }}
+          />
+          <FloralCornerFrame
+            className="floral-hide-mobile absolute -bottom-4 -left-4 w-40 text-primary/[0.05]"
+            style={{ animation: "sway 13s ease-in-out infinite", transformOrigin: "bottom left", transform: "scaleY(-1)" }}
+          />
+          <FloralCornerFrame
+            className="floral-hide-mobile absolute -bottom-4 -right-4 w-40 text-secondary/[0.05]"
+            style={{ animation: "sway 15s ease-in-out infinite", transformOrigin: "bottom right", transform: "scale(-1)" }}
+          />
+          {/* Scattered leaf sprigs */}
+          <SingleLeafSprig
+            className="floral-hide-mobile absolute top-32 left-[12%] w-12 text-primary/[0.07]"
+            style={{ animation: "sway 10s ease-in-out infinite" }}
+          />
+          <SingleLeafSprig
+            className="floral-hide-mobile absolute top-48 right-[15%] w-10 text-secondary/[0.06]"
+            style={{ animation: "sway 11s ease-in-out infinite 1s", transform: "scaleX(-1)" }}
+          />
+          <SingleLeafSprig
+            className="floral-hide-mobile absolute bottom-28 left-[20%] w-10 text-primary/[0.05]"
+            style={{ animation: "drift 16s ease-in-out infinite" }}
+          />
         </div>
 
         <div ref={hero.ref} className={`reveal ${hero.visible ? "visible" : ""} relative`}>
@@ -241,7 +276,7 @@ export default function LandingPage() {
       </section>
 
       {/* ============== APP PREVIEW ============== */}
-      <section className="px-6 pb-16 pt-4">
+      <section className="bg-background px-6 pb-20 pt-4">
         <div ref={preview.ref} className={`reveal ${preview.visible ? "visible" : ""} mx-auto max-w-4xl`}>
           <div className="overflow-hidden rounded-xl border border-border/60 bg-surface shadow-elevated">
             {/* Browser chrome */}
@@ -255,12 +290,10 @@ export default function LandingPage() {
             </div>
             {/* Mock dashboard */}
             <div className="bg-background p-6 sm:p-8">
-              {/* Mock header */}
               <div className="mb-6 text-center">
                 <h3 className="font-heading text-xl tracking-wider text-text">Thank You Tracker</h3>
                 <p className="text-sm text-text-muted">Sarah & James</p>
               </div>
-              {/* Mock stats */}
               <div className="mb-6 flex justify-center gap-8">
                 <div className="text-center">
                   <span className="block text-2xl font-semibold text-primary">24</span>
@@ -275,14 +308,12 @@ export default function LandingPage() {
                   <span className="text-[0.65rem] uppercase tracking-wider text-text-muted">Remaining</span>
                 </div>
               </div>
-              {/* Mock progress */}
               <div className="mb-6">
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
                   <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-secondary to-primary transition-all" />
                 </div>
                 <p className="mt-1 text-center text-xs text-text-muted">75% complete</p>
               </div>
-              {/* Mock gift cards */}
               <div className="flex flex-col gap-3">
                 {[
                   { name: "Aunt Margaret", gift: "KitchenAid Stand Mixer", sent: false },
@@ -309,9 +340,24 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Wave divider: background → surface */}
+      <SectionDivider className="-mb-px bg-background" fill="#F0ECE5" />
+
       {/* ============== FEATURES ============== */}
-      <section id="features" className="border-t border-border/60 bg-surface/40 px-6 py-20 sm:px-10">
-        <div ref={features.ref} className={`reveal ${features.visible ? "visible" : ""} mx-auto max-w-5xl`}>
+      <section id="features" className="relative bg-surface px-6 py-24 sm:px-10 sm:py-28">
+        {/* Eucalyptus framing */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <EucalyptusSpray
+            className="floral-hide-mobile absolute -left-6 top-8 w-20 text-primary/[0.05]"
+            style={{ animation: "sway 15s ease-in-out infinite", transformOrigin: "bottom center" }}
+          />
+          <EucalyptusSpray
+            className="floral-hide-mobile absolute -right-6 top-8 w-20 text-secondary/[0.05]"
+            style={{ animation: "sway 16s ease-in-out infinite 2s", transformOrigin: "bottom center", transform: "scaleX(-1)" }}
+          />
+        </div>
+
+        <div ref={features.ref} className={`reveal ${features.visible ? "visible" : ""} relative mx-auto max-w-5xl`}>
           <p className="mb-2 text-center text-sm font-medium uppercase tracking-[3px] text-secondary">
             Features
           </p>
@@ -345,9 +391,28 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Wave divider: surface → background */}
+      <SectionDivider className="-mb-px bg-surface" fill="#FBF9F5" />
+
       {/* ============== HOW IT WORKS ============== */}
-      <section className="px-6 py-20 sm:px-10">
-        <div ref={steps.ref} className={`reveal ${steps.visible ? "visible" : ""} mx-auto max-w-4xl`}>
+      <section className="relative bg-background px-6 py-24 sm:px-10 sm:py-28">
+        {/* Floral accents */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <SingleLeafSprig
+            className="floral-hide-mobile absolute top-16 left-[8%] w-12 text-primary/[0.06]"
+            style={{ animation: "sway 10s ease-in-out infinite" }}
+          />
+          <SingleLeafSprig
+            className="floral-hide-mobile absolute top-28 right-[10%] w-10 text-secondary/[0.05]"
+            style={{ animation: "sway 12s ease-in-out infinite 1.5s", transform: "scaleX(-1)" }}
+          />
+          <PeonyCluster
+            className="floral-hide-mobile absolute -right-12 bottom-12 w-44 text-secondary/[0.04]"
+            style={{ animation: "drift 16s ease-in-out infinite" }}
+          />
+        </div>
+
+        <div ref={steps.ref} className={`reveal ${steps.visible ? "visible" : ""} relative mx-auto max-w-4xl`}>
           <p className="mb-2 text-center text-sm font-medium uppercase tracking-[3px] text-secondary">
             How It Works
           </p>
@@ -376,9 +441,24 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Wave divider: background → surface */}
+      <SectionDivider className="-mb-px bg-background" fill="#F0ECE5" />
+
       {/* ============== STATS / SOCIAL PROOF ============== */}
-      <section className="border-t border-border/60 bg-surface/40 px-6 py-16 sm:px-10">
-        <div ref={stats.ref} className={`reveal ${stats.visible ? "visible" : ""} mx-auto max-w-4xl`}>
+      <section className="relative bg-surface px-6 py-20 sm:px-10 sm:py-24">
+        {/* Floral accents */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <PeonyCluster
+            className="floral-hide-mobile absolute -left-16 top-1/2 -translate-y-1/2 w-48 text-primary/[0.04]"
+            style={{ animation: "drift 18s ease-in-out infinite" }}
+          />
+          <PeonyCluster
+            className="floral-hide-mobile absolute -right-16 top-1/2 -translate-y-1/2 w-48 text-secondary/[0.04]"
+            style={{ animation: "drift 20s ease-in-out infinite 3s", transform: "scaleX(-1)" }}
+          />
+        </div>
+
+        <div ref={stats.ref} className={`reveal ${stats.visible ? "visible" : ""} relative mx-auto max-w-4xl`}>
           <div className="grid grid-cols-3 gap-6 text-center">
             <div>
               <span className="block font-heading text-4xl text-primary sm:text-5xl">{giftsCount}+</span>
@@ -396,9 +476,21 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Wave divider: surface → background */}
+      <SectionDivider className="-mb-px bg-surface" fill="#FBF9F5" />
+
       {/* ============== TESTIMONIAL-STYLE CALLOUT ============== */}
-      <section className="px-6 py-20 sm:px-10">
-        <div className="mx-auto max-w-3xl text-center">
+      <section className="relative bg-background px-6 py-24 sm:px-10 sm:py-28">
+        {/* Subtle radial glow behind the quote */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[500px] rounded-full bg-primary/[0.03] blur-3xl" />
+          <PeonyCluster
+            className="floral-hide-mobile absolute -left-8 top-8 w-36 text-primary/[0.05]"
+            style={{ animation: "drift 14s ease-in-out infinite" }}
+          />
+        </div>
+
+        <div className="relative mx-auto max-w-3xl text-center">
           <svg viewBox="0 0 24 24" fill="currentColor" className="mx-auto mb-4 h-8 w-8 text-primary/20">
             <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
           </svg>
@@ -412,9 +504,29 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Wave divider: background → surface */}
+      <SectionDivider className="-mb-px bg-background" fill="#F0ECE5" />
+
       {/* ============== FINAL CTA ============== */}
-      <section className="border-t border-border/60 px-6 py-20 text-center sm:px-10">
-        <div ref={cta.ref} className={`reveal ${cta.visible ? "visible" : ""}`}>
+      <section className="relative bg-surface px-6 py-24 text-center sm:px-10 sm:py-28">
+        {/* Corner florals */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <FloralCornerFrame
+            className="floral-hide-mobile absolute -top-4 -left-4 w-36 text-primary/[0.05]"
+            style={{ animation: "sway 12s ease-in-out infinite", transformOrigin: "top left" }}
+          />
+          <FloralCornerFrame
+            className="floral-hide-mobile absolute -top-4 -right-4 w-36 text-secondary/[0.05]"
+            style={{ animation: "sway 14s ease-in-out infinite 1s", transformOrigin: "top right", transform: "scaleX(-1)" }}
+          />
+          {/* Delicate vine along bottom */}
+          <DelicateVine
+            className="absolute bottom-4 left-0 w-full h-12 text-primary/[0.04]"
+            style={{ animation: "drift 20s ease-in-out infinite" }}
+          />
+        </div>
+
+        <div ref={cta.ref} className={`reveal ${cta.visible ? "visible" : ""} relative`}>
           <h2 className="mb-3 font-heading text-3xl tracking-wider text-text sm:text-4xl">
             Ready to get started?
           </h2>
@@ -428,17 +540,20 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Wave divider: surface → dark footer */}
+      <SectionDivider className="-mb-px bg-surface" fill="#5A524B" />
+
       {/* ============== FOOTER ============== */}
-      <footer className="border-t border-border/40 px-6 py-8">
+      <footer className="bg-accent px-6 py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <span className="font-heading text-sm tracking-wider text-text-muted">
+          <span className="font-heading text-sm tracking-wider text-background/80">
             Thank You Tracker
           </span>
-          <div className="flex gap-6 text-sm text-text-muted">
+          <div className="flex gap-6 text-sm text-background/60">
             <Link href="/login" className="transition-colors hover:text-primary">Sign In</Link>
             <Link href="/login" className="transition-colors hover:text-primary">Create Account</Link>
           </div>
-          <span className="text-xs text-text-muted/60">
+          <span className="text-xs text-background/40">
             Built with care for your big day.
           </span>
         </div>
